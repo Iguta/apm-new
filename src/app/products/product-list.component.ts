@@ -1,32 +1,45 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
+import { Iproduct } from "./product";
+import { ProductService } from "./products.services";
 
 
 @Component({
   selector: "pm-products",
-  templateUrl:'./product-list.component.html'
+  templateUrl: './product-list.component.html',
+  styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent {
-  pageTitle:string = "Product List";
-  products :any[]= [
-    {
-      "productId":2,
-      "productName":"Garden Cart",
-      "productCode":"GDN-0023",
-      "releaseDate":"Feb 18, 2022",
-      "description":"15 gallon capaciyty rolling garden cart",
-      "price":32.99,
-      "starRating":4.2,
-      "imageUrl":"assets/images/garden_cart.png"
-    },
-    {
-      "productId":3,
-      "productName":"Garden Cart 2",
-      "productCode":"GDN-0024",
-      "releaseDate":"Feb 18, 2032",
-      "description":"15 gallon capaciyty rolling garden cart",
-      "price":40.22,
-      "starRating":4.6,
-      "imageUrl":"assets/images/garden_cart.png"
-    }
-  ];
+export class ProductListComponent implements OnInit {
+  pageTitle: string = "Product List";
+  imageWidth: number = 50;
+  imageMargin: number = 2;
+  showImage: boolean = true;
+  private _listFilter: string = '';
+  //shorthand
+  //this creates a local private property productService and assigns it to the injected service
+  constructor(private productService:ProductService){}
+  get listFilter(): string {
+    return this._listFilter;
+  }
+  set listFilter(value: string) {
+    this._listFilter = value;
+    console.log("In setter: ", value);
+    this.filteredProducts = this.performFilter(value);
+  }
+  filteredProducts: Iproduct[] = [];
+  products: Iproduct[] = [];
+  performFilter(filterBy:string): Iproduct[] {
+    filterBy = filterBy.toLowerCase();
+    return this.products.filter((product:Iproduct) =>
+    product.productName.toLowerCase().includes(filterBy))
+  }
+  toggleImage(): void {
+    this.showImage = !this.showImage;
+  };
+  onRatingClicked(message:string):void{
+    this.pageTitle = "Product List: " + message
+  }
+  ngOnInit(): void {
+    this.products = this.productService.getProducts();
+    this.filteredProducts = this.products;
+  }
 }
